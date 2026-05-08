@@ -1,0 +1,64 @@
+----------------------------------------------------------------------------------
+-- Company:
+-- Engineer:
+--
+-- Create Date: 24.02.2026 15:35:19
+-- Design Name:
+-- Module Name: Sirenita - Behavioral
+-- Project Name:
+-- Target Devices:
+-- Tool Versions:
+-- Description:
+--
+-- Dependencies:
+--
+-- Revision:
+-- Revision 0.01 - File Created
+-- Additional Comments:
+--
+----------------------------------------------------------------------------------
+
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+-- Uncomment the following library declaration if using
+-- arithmetic functions with Signed or Unsigned values
+--use IEEE.NUMERIC_STD.ALL;
+
+-- Uncomment the following library declaration if instantiating
+-- any Xilinx leaf cells in this code.
+--library UNISIM;
+--use UNISIM.VComponents.all;
+
+entity OSIOSI is
+    Port ( CLK : in STD_LOGIC;
+			  out_clk: out STD_LOGIC);
+end OSIOSI;
+
+architecture Behavioral of OSIOSI is
+
+CONSTANT MEDIO_PERIODO: INTEGER:= 39; 
+
+SIGNAL CONTADOR : INTEGER := 0;
+SIGNAL FLAG_MS : STD_LOGIC:= '0';
+
+begin
+
+CLOCK_MS:process(CLK)
+
+begin
+    IF rising_edge(CLK) then --Cada transicion de 0 a 1 del CLK (0.5ms)
+
+        IF CONTADOR =  MEDIO_PERIODO then
+           CONTADOR <= 0;
+           FLAG_MS <= NOT FLAG_MS;
+        else
+            CONTADOR <= CONTADOR + 1;
+        end if;
+
+    END IF;
+END process;
+
+OUT_clk <= FLAG_MS;
+end Behavioral;
