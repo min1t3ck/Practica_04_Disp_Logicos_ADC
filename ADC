@@ -33,7 +33,8 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity OSIOSI is
     Port ( CLK : in STD_LOGIC;
-			  out_clk: out STD_LOGIC);
+			  out_clk: out STD_LOGIC;
+			  OUT_CLK_UPDATE: out STD_LOGIC);
 end OSIOSI;
 
 architecture Behavioral of OSIOSI is
@@ -43,13 +44,19 @@ CONSTANT MEDIO_PERIODO: INTEGER:= 39;
 SIGNAL CONTADOR : INTEGER := 0;
 SIGNAL FLAG_MS : STD_LOGIC:= '0';
 
+
+
+CONSTANT HALF_CLK_UPDATE: INTEGER:= 10_000_000; 
+
+SIGNAL CONTA_UPDATE : INTEGER := 0;
+SIGNAL FLAG_UPDATE : STD_LOGIC:= '0';
+
 begin
 
 CLOCK_MS:process(CLK)
 
 begin
-    IF rising_edge(CLK) then --Cada transicion de 0 a 1 del CLK (0.5ms)
-
+    IF rising_edge(CLK) then --
         IF CONTADOR =  MEDIO_PERIODO then
            CONTADOR <= 0;
            FLAG_MS <= NOT FLAG_MS;
@@ -60,5 +67,23 @@ begin
     END IF;
 END process;
 
+
+
+CLOCK_UPDATE:process(CLK)
+
+begin
+    IF rising_edge(CLK) then --
+
+        IF CONTA_UPDATE =  HALF_CLK_UPDATE then
+           CONTA_UPDATE <= 0;
+           FLAG_UPDATE <= NOT FLAG_UPDATE;
+        else
+            CONTA_UPDATE <= CONTA_UPDATE + 1;
+        end if;
+
+    END IF;
+END process;
+
 OUT_clk <= FLAG_MS;
+OUT_CLK_UPDATE <= FLAG_UPDATE;
 end Behavioral;
