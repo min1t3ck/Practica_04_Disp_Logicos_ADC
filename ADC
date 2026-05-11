@@ -30,7 +30,9 @@ use IEEE.STD_LOGIC_1164.ALL;
 entity OSIOSI is
     Port ( CLK : in STD_LOGIC;
 			  out_clk: out STD_LOGIC;
-			  OUT_CLK_UPDATE: out STD_LOGIC);
+			  OUT_CLK_UPDATE: out STD_LOGIC;
+			  SAL: out std_LOGIC;
+			  OUT_CLK_LCD: out STD_LOGIC);
 end OSIOSI;
 --
 
@@ -74,6 +76,37 @@ CONSTANT HALF_CLK_UPDATE: INTEGER:= 1_000_000; --Duración en cliclos de Reloj d
 SIGNAL CONTA_UPDATE : INTEGER := 0;
 SIGNAL FLAG_UPDATE : STD_LOGIC:= '0';
 
+
+
+-----------------------------------------
+-- 				CLOCK_LCD
+-----------------------------------------
+--Constantes:
+CONSTANT HALF_CLK_LCD: INTEGER:= 25; --Duración en cliclos de Reloj del medio periodo de 1us/2 = 500ns = 25 CM
+
+--Señales:
+SIGNAL CONTA_CLK_LCD : INTEGER := 0;
+SIGNAL CLK_LCD : STD_LOGIC:= '0';
+--
+
+
+
+-----------------------------------------
+-- 				INI_LCD
+-----------------------------------------
+--Constantes:
+--CONSTANT HALF_CLK_LCD: INTEGER:= 25; --Duración en cliclos de Reloj del medio periodo de 1us/2 = 500ns = 25 CM
+
+--Señales:
+SIGNAL MS_TRASCURRIDOS : INTEGER := 0; -- AL NO ESPECIFICAR RANGO EL SINTETIZADOR LO HARÁ DE 32 BITS
+
+SIGNAL SAL_SIGNAL : STD_LOGIC := '0';
+
+
+
+
+
+
 begin
 ----------------------------------------------------------------------------------
 
@@ -100,6 +133,9 @@ begin
 
     END IF;
 END process;
+-- ASIGNACIONES DIRECTAS ASOCIADAS:
+OUT_clk <= FLAG_ADC;
+
 --
 
 
@@ -121,16 +157,82 @@ begin
 
     END IF;
 END process;
+-- ASIGNACIONES DIRECTAS ASOCIADAS:
+OUT_CLK_UPDATE <= FLAG_UPDATE;
+
 --
 
 
 
 
---					----------------------------------------------------
--- 									ASIGNACIONES DIRECTAS
---					----------------------------------------------------
-OUT_clk <= FLAG_ADC;
-OUT_CLK_UPDATE <= FLAG_UPDATE;
+-----------------------------------------
+-- 				CLOCK_LCD
+-----------------------------------------
+--Descipcion: Reloj cuya frecuencia es de 1000 ns = 1us =  50 CM
+CLOCK_LCD:process(CLK)
+
+begin
+    IF rising_edge(CLK) then
+
+        IF CONTA_CLK_LCD =  HALF_CLK_LCD then
+           CONTA_CLK_LCD <= 0;
+           CLK_LCD <= NOT CLK_LCD;
+        else
+            CONTA_CLK_LCD <= CONTA_CLK_LCD + 1;
+        end if;
+
+    END IF;
+END process;
+-- ASIGNACIONES DIRECTAS ASOCIADAS:
+OUT_CLK_LCD <= CLK_LCD;
+
+--
+
+
+
+
+-----------------------------------------
+-- 				INI_LCD
+-----------------------------------------
+-- Descipcion: Maquina de estados FINITA que Arranca la LCD 
+-- con los pasos que indicados por el fabricante:
+-- 1-. Hand Shake
+-- 2-. Inicializa la LCD con una comunicación a 4 bits (D4-D7)
+-- 3-. Enciende la LCD.
+
+
+INI_LCD:process(CLK_LCD)
+begin
+    IF rising_edge(CLK_LCD) then 
+		-- CADA QUE TRANSCURRA 1 ms:
+		CASE MS_TRASCURRIDOS IS
+			WHEN 1_000_000 =>
+				SAL_SIGNAL <= '1';
+			WHEN 3_000_000 =>
+				SAL_SIGNAL <= '0';
+			WHEN 3_500_000 =>
+				SAL_SIGNAL <= '1';
+			WHEN 4_000_000 =>
+				SAL_SIGNAL <= '0';
+			WHEN OTHERS =>
+				NULL;
+		END CASE;
+		-- ACTUALIZAR LOS ms TRASCURRIDOS:
+		MS_TRASCURRIDOS <= MS_TRASCURRIDOS + 1;
+	 END IF;
+END process;
+
+-- ASIGNACIONES DIRECTAS ASOCIADAS:
+	SAL <= SAL_SIGNAL;
+--
+
+
+
+
+
+
+
+
 
 
 
