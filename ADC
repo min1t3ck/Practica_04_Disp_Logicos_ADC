@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
--- Company:
--- Engineer:
+-- Company: Soluciones DLP
+-- Engineer: Arreguín Hernández Julio David
 --
 -- Create Date: 24.02.2026 15:35:19
 -- Design Name:
@@ -22,53 +22,91 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
 
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
 
+----------------------------------------------------------------------------------
+--						Descripcion de la entidad (Entradas y salidas)
+----------------------------------------------------------------------------------
 entity OSIOSI is
     Port ( CLK : in STD_LOGIC;
 			  out_clk: out STD_LOGIC;
 			  OUT_CLK_UPDATE: out STD_LOGIC);
 end OSIOSI;
+--
 
+
+
+
+
+
+
+
+
+
+----------------------------------------------------------------------------------
+--											Arquitectura
+----------------------------------------------------------------------------------
 architecture Behavioral of OSIOSI is
+--					----------------------------------------------------
+--								Constantes y Señales por Proceso
+--					----------------------------------------------------
 
-CONSTANT MEDIO_PERIODO: INTEGER:= 39; 
+-----------------------------------------
+-- 				CLOCK_ADC
+-----------------------------------------
+--Constantes:
+CONSTANT HALF_CLK_ADC: INTEGER:= 39; 
 
-SIGNAL CONTADOR : INTEGER := 0;
-SIGNAL FLAG_MS : STD_LOGIC:= '0';
+--Señales:
+SIGNAL CONT_ADC : INTEGER := 0;
+SIGNAL FLAG_ADC : STD_LOGIC:= '0';
 
 
 
-CONSTANT HALF_CLK_UPDATE: INTEGER:= 10_000_000; 
 
+-----------------------------------------
+-- 				CLOCK_UPDATE
+-----------------------------------------
+--Constantes:
+CONSTANT HALF_CLK_UPDATE: INTEGER:= 1_000_000; --Duración en cliclos de Reloj del medio periodo
+
+--Señales:
 SIGNAL CONTA_UPDATE : INTEGER := 0;
 SIGNAL FLAG_UPDATE : STD_LOGIC:= '0';
 
 begin
+----------------------------------------------------------------------------------
 
-CLOCK_MS:process(CLK)
+
+
+
+--					----------------------------------------------------
+--												PROCESOS
+--					----------------------------------------------------
+
+-----------------------------------------
+-- 				CLOCK_ADC
+-----------------------------------------
+CLOCK_ADC:process(CLK)
 
 begin
     IF rising_edge(CLK) then --
-        IF CONTADOR =  MEDIO_PERIODO then
-           CONTADOR <= 0;
-           FLAG_MS <= NOT FLAG_MS;
+        IF CONT_ADC =  HALF_CLK_ADC then
+           CONT_ADC <= 0;
+           FLAG_ADC <= NOT FLAG_ADC;
         else
-            CONTADOR <= CONTADOR + 1;
+            CONT_ADC <= CONT_ADC + 1;
         end if;
 
     END IF;
 END process;
+--
 
 
 
+-----------------------------------------
+-- 				CLOCK_UPDATE
+-----------------------------------------
 CLOCK_UPDATE:process(CLK)
 
 begin
@@ -83,7 +121,17 @@ begin
 
     END IF;
 END process;
+--
 
-OUT_clk <= FLAG_MS;
+
+
+
+--					----------------------------------------------------
+-- 									ASIGNACIONES DIRECTAS
+--					----------------------------------------------------
+OUT_clk <= FLAG_ADC;
 OUT_CLK_UPDATE <= FLAG_UPDATE;
+
+
+
 end Behavioral;
